@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bc38632d-9c8e-40d2-99c0-eaf306aaea4f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<os:object-store name="accessToken" doc:name="Object store" doc:id="664398b7-5832-4254-8ede-35df79d6a6c4" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="78f43282-6352-4a25-9204-e422ead4ca3e" basePath="/services" >
+		<http:request-connection protocol="HTTPS" host="login.salesforce.com" />
+	</http:request-config>
+	<sub-flow name="generate-access-token" doc:id="999bd5fc-1cce-414c-aa9e-65886fecbba9" >
+		<ee:transform doc:name="Transform Message" doc:id="5120f3ac-ead2-475d-af96-4b6ef0d2eb54">
+			<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+{
+grant_type: "password",
+client_id:"3MVG9HB6vm3GZZR8xGEoi9_gWwKM52QJRn45a7Gqs_akp877zcmxWz_RidaKF0czfmfciEvXYSJuDhMt.T4tC",
+client_secret:"DA14E12A35214E9A1F81D961353C04BD742836027654CA52FD369AB120376422",
+username: "gateway2salesforce@gmail.com",
+password:"Habtamu3442\$\$\$Jw0u5W9u21QkCaDcaQkKtQLy"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="c6b824c3-abc4-4476-8410-45b4f095cf2e" sendCorrelationId="AUTO" config-ref="HTTP_Request_configuration" path="/oauth2/token">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "application/x-www-form-urlencoded"
+}]]]></http:headers>
+					<http:query-params><![CDATA[#[payload]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="1ff25358-fb31-49c4-8767-f01a4fef1c7d" message="#[vars.response]" />
+		<ee:transform doc:name="Transform Message" doc:id="199e9dd0-106a-413e-a6fd-a5f994c50cf1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.access_token]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<os:store doc:name="Store" doc:id="ad42af96-e352-4c75-9e41-cef7c11c7052" key="access_token" objectStore="accessToken">
+		</os:store>
+	</sub-flow>
+	<flow name="authorization-flowFlow" doc:id="452e210f-3183-4144-baa8-fedb819d298c" >
+		<http:listener doc:name="Listener" doc:id="e56d5fcc-3593-40c8-a5f7-9055ba72372c" config-ref="HTTP_Listener_config" path="/token"/>
+		<os:retrieve doc:name="Retrieve" doc:id="8792b1af-d645-4eba-a2d9-917733b52b14" key="access_token" objectStore="accessToken" target="access_token">
+			<os:default-value ><![CDATA[#[""]]]></os:default-value>
+		</os:retrieve>
+		<choice doc:name="Choice" doc:id="4b0ead5e-3596-4e21-a215-bfc0e175ea9f">
+			<when expression="#[isEmpty(vars.access_token)]">
+				<flow-ref doc:name="Flow Reference to generate-access-token" doc:id="6f6d7649-ac2d-4711-808b-ef5c6ffac94f" name="generate-access-token" target="access_token" />
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="6b83dc31-3d6c-4f42-bfe5-e8684451170f" message="The generated access token is valid #[vars.response]" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="ddbcf497-c70e-4fd3-b700-714971342230"/>
+	</flow>
+</mule>

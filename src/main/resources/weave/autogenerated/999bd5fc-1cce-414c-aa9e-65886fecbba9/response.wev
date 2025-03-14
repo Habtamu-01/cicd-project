@@ -1,0 +1,5 @@
+%dw 2.0
+
+type auto_999bd5fc_1cce_414c_aa9e_65886fecbba9_Input_Variables_oauth_response = {|  |} {"typeId": "java.io.Serializable",
+"typeAlias": "Serializable"}
+
