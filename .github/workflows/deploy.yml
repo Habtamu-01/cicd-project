@@ -1,5 +1,4 @@
-
-name: Clouhub Deployment
+name: Cloudhub Deployment
 
 on:
   push:
@@ -14,27 +13,29 @@ jobs:
 
     steps:
     - name: Checkout code repo
-    - uses: actions/checkout@v4
+      uses: actions/checkout@v4
     
-    - name: Set up JDK 8/Cache dependencies
+    - name: Set up JDK 8 and Cache dependencies
       uses: actions/setup-java@v4
       with:
         java-version: '8'
         distribution: 'temurin'
         cache: maven
-    - name: Build with maven
+
+    - name: Build with Maven
       run: mvn -B clean package -s .maven/settings.xml
-      
+
     - name: Upload Artifact
-      run: mkdir staging && cp target/*.jar staging
+      run: |
+        mkdir staging
+        cp target/*.jar staging
     - uses: actions/upload-artifact@v4
       with:
-         name: Package
-         path: staging
-      
-    - name: Deploy with maven
+        name: Package
+        path: staging
+
+    - name: Deploy with Maven
       run: mvn -B deploy -DmuleDeploy -s .maven/settings.xml
       env:
-        ANYPOINT_PALTFORM_USERNAME: ${{secrets.ANYPOINT_PALTFORM_USERNAME}}
-        ANYPOINT_PALTFORM_PASSWORD: ${{secrets.ANYPOINT_PALTFORM_PASSWORD}}
-      
+        ANYPOINT_PLATFORM_USERNAME: ${{ secrets.ANYPOINT_PLATFORM_USERNAME }}
+        ANYPOINT_PLATFORM_PASSWORD: ${{ secrets.ANYPOINT_PLATFORM_PASSWORD }}
