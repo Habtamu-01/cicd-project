@@ -10,6 +10,7 @@ on:
 jobs:
   buildAndDeploy:
     runs-on: ubuntu-latest
+    environment: prod
 
     steps:
     - name: Checkout code repo
