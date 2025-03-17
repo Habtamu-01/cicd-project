@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<settings>
+	<servers>
+		<!-- <server>
+			<id>Exchange2</id>
+			<username>sbc-sathish</username>
+			<password>Mar@2023</password>
+		</server> -->
+		<server>
+			<id>anypoint-exchange-v3</id>
+			<username>${env.ANYPOINT_PLATFORM_USERNAME}</username>
+			<password>${env.ANYPOINT_PLATFORM_PASSWORD}</password>
+		</server> 
+		<!-- <server>
+			<id>Connected-App</id>
+			<username>~~~Client~~~</username>
+			<password>c3a46f0b2ad64045b177eb9c7ab2ffb2~?~F9665b4df2d14eaaA443C51dA7541101</password>
+		</server> -->
+		<!-- <server>
+			<id>MuleRepository</id>
+			<username>specialized.bicycle.nexus</username>
+			<password>KC3J5rSqf6U4FDK</password>
+		</server> -->
+		
+	</servers>
+	<!--<localRepository>C:/Users/M2</localRepository>-->
+	<pluginGroups>
+		<pluginGroup>org.mule.tools</pluginGroup>
+	</pluginGroups>
+
+	<profiles>
+		<!-- <profile>
+			<id>mule-extra-repos</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+
+			<repositories>
+				<repository>
+					<id>mule-public</id>
+					<url>https://repository.mulesoft.org/nexus/content/repositories/public</url>
+				</repository>
+			</repositories>
+
+			<pluginRepositories>
+				<pluginRepository>
+					<id>mule-public</id>
+					<url>https://repository.mulesoft.org/nexus/content/repositories/public</url>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile> -->
+
+		<profile>
+			<id>Mule</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+
+			<repositories>
+			<!--	<repository>
+					<id>MuleRepository</id>
+					<name>MuleRepository</name>
+					<url>https://repository.mulesoft.org/nexus-ee/content/repositories/releases-ee/</url>
+					<layout>default</layout>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository> -->
+				<repository>
+					<id>anypoint-exchange-v3</id>
+					<name>Anypoint Exchange</name>
+					<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+					<layout>default</layout>
+				</repository>
+
+				<repository>
+					<id>MuleRepositoryPublic</id>
+					<name>MuleRepositoryPublic</name>
+					<url>https://repository.mulesoft.org/nexus/content/repositories/public</url>
+					<layout>default</layout>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+
+		</profile>
+	</profiles>
+</settings>
