@@ -8,8 +8,8 @@
 		</server> -->
 		<server>
 			<id>Repository</id>
-			<username>${env.ANYPOINT_PLATFORM_USERNAME}</username>
-			<password>${env.ANYPOINT_PLATFORM_PASSWORD}</password>
+			<username>Habtamu-01</username>
+			<password>Mulesoft@2025</password>
 		</server> 
 		<!-- <server>
 			<id>Connected-App</id>
@@ -70,7 +70,7 @@
 					</snapshots>
 				</repository> -->
 				<repository>
-					<id>anypoint-exchange-v3</id>
+					<id>Repository</id>
 					<name>Anypoint Exchange</name>
 					<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
 					<layout>default</layout>
