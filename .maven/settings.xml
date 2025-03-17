@@ -7,7 +7,7 @@
 			<password>Mar@2023</password>
 		</server> -->
 		<server>
-			<id>anypoint-exchange-v3</id>
+			<id>Repository</id>
 			<username>${env.ANYPOINT_PLATFORM_USERNAME}</username>
 			<password>${env.ANYPOINT_PLATFORM_PASSWORD}</password>
 		</server> 
