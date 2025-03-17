@@ -1,41 +1,66 @@
-name: Cloudhub Deployment
+name: Build and Deploy to Sandbox
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
-
-jobs:
-  buildAndDeploy:
-    runs-on: ubuntu-latest
-    environment: prod
-
-    steps:
-    - name: Checkout code repo
-      uses: actions/checkout@v4
+    branches: [ main ]
     
-    - name: Set up JDK 8 and Cache dependencies
-      uses: actions/setup-java@v4
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout this repo
+      uses: actions/checkout@v3
+    - name: Cache dependencies
+      uses: actions/cache@v3
       with:
-        java-version: '8'
-        distribution: 'temurin'
-        cache: maven
-
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: 8
     - name: Build with Maven
-      run: mvn -B clean package -s .maven/settings.xml
-
-    - name: Upload Artifact
+      run: mvn -B package --file pom.xml
+    - name: Stamp artifact file name with commit hash
       run: |
-        mkdir staging
-        cp target/*.jar staging
-    - uses: actions/upload-artifact@v4
+        artifactName1=$(ls target/*.jar | head -1)
+        commitHash=$(git rev-parse --short "$GITHUB_SHA")
+        artifactName2=$(ls target/*.jar | head -1 | sed "s/.jar/-$commitHash.jar/g")
+        mv $artifactName1 $artifactName2
+    - name: Upload artifact 
+      uses: actions/upload-artifact@v3
       with:
-        name: Package
-        path: staging
-
-    - name: Deploy with Maven
-      run: mvn -B deploy -DmuleDeploy -s .maven/settings.xml
+          name: artifacts
+          path: target/*.jar
+        
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:    
+    - name: Checkout this repo
+      uses: actions/checkout@v3
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - uses: actions/download-artifact@v3
+      with:
+        name: artifacts
+    - name: Deploy to Sandbox
       env:
-        ANYPOINT_PLATFORM_USERNAME: ${{ secrets.ANYPOINT_PLATFORM_USERNAME }}
-        ANYPOINT_PLATFORM_PASSWORD: ${{ secrets.ANYPOINT_PLATFORM_PASSWORD }}
+        USERNAME: ${{ secrets.anypoint_platform_username }}
+        PASSWORD: ${{ secrets.anypoint_platform_password }}
+      run: |
+        artifactName=$(ls *.jar | head -1)
+        mvn deploy -DmuleDeploy \
+         -Dmule.artifact=$artifactName \
+         -Danypoint.username="$USERNAME" \
+         -Danypoint.password="$PASSWORD" 
