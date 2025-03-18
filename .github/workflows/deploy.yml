@@ -12,7 +12,15 @@ jobs:
     steps:
       - name: Checkout code repo
         uses: actions/checkout@v4
-      
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Set up JDK 8 and Cache dependencies
         uses: actions/setup-java@v4
         with:
@@ -23,14 +31,20 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean package -s .maven/settings.xml
 
-      - name: Upload Artifact
+      - name: Rename artifact with commit hash
         run: |
           mkdir staging
-          cp target/*.jar staging
-      - uses: actions/upload-artifact@v4
+          artifactName=$(ls target/*.jar | head -1)
+          commitHash=$(git rev-parse --short "$GITHUB_SHA")
+          newArtifactName="target/$(basename "$artifactName" .jar)-$commitHash.jar"
+          mv "$artifactName" "$newArtifactName"
+          cp "$newArtifactName" staging/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: Package
-          path: staging
+          path: staging/*.jar
 
   deploy:
     needs: build
@@ -40,14 +54,34 @@ jobs:
       - name: Checkout code repo
         uses: actions/checkout@v4
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           name: Package
           path: staging
 
+      - name: Verify downloaded artifact
+        run: |
+          echo "Files in staging:"
+          ls -l staging/
+          artifactName=$(ls staging/*.jar | head -1)
+          echo "Artifact to deploy: $artifactName"
+
       - name: Deploy with Maven
-        run: mvn -B deploy -DmuleDeploy -s .maven/settings.xml
         env:
           ANYPOINT_PLATFORM_USERNAME: ${{ secrets.ANYPOINT_PLATFORM_USERNAME }}
           ANYPOINT_PLATFORM_PASSWORD: ${{ secrets.ANYPOINT_PLATFORM_PASSWORD }}
+        run: |
+          artifactName=$(ls staging/*.jar | head -1)
+          mvn -B deploy -DmuleDeploy \
+            -Dmule.artifact="$artifactName" \
+            -Danypoint.username="$ANYPOINT_PLATFORM_USERNAME" \
+            -Danypoint.password="$ANYPOINT_PLATFORM_PASSWORD"
