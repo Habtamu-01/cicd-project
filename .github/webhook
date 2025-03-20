@@ -2,15 +2,14 @@ name: "Webhook Event"
 
 on:
   repository_dispatch:
-    types:
-      - custom_webhook
+    types: [webhook]  # Correct indentation
 
 jobs:
   run_script:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Run a script
         run: echo "Event of type: $GITHUB_EVENT_NAME"
