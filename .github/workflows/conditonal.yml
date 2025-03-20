@@ -7,12 +7,13 @@ on:
   pull_request:
 
 jobs:
-  conditional_job:
+  example:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Run only on main branch
-        if: github.ref == 'refs/heads/main'
-        run: echo "This step runs only on the main branch"
+      - name: Conditional Execution with Else
+        run: |
+          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
+            echo "Running on the main branch"
+          else
+            echo "Running on another branch"
+          fi
