@@ -3,7 +3,7 @@ name: Conditional Workflow
 on:
   push:
     branches:
-      - xyz
+      - main
   pull_request:
 
 jobs:
