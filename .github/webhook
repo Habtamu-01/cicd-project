@@ -2,6 +2,8 @@ name: "Webhook Event"
 
 on:
   repository_dispatch:
+    types:
+      - custom_webhook
 
 jobs:
   run_script:
