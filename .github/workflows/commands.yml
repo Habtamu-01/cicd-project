@@ -16,9 +16,11 @@ jobs:
           echo "MSG 1"
           echo "MSG 2"
           echo "::endgroup::"
-      - name: "Step 1"
+
+      - name: "Step 1 - Set Environment Variable"
         run: |
-         echo "my_val=Hello" >> $GITHUB_ENV
-      - name: "Step 2"
+          echo "my_val=Hello" >> $GITHUB_ENV
+
+      - name: "Step 2 - Use Environment Variable"
         run: |
-         echo $my_val
+          echo "${{ env.my_val }}"  # Correct way to reference it
