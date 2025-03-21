@@ -1,0 +1,19 @@
+name: "GitHub Context Example"
+
+on: 
+  push  # Correct YAML syntax instead of ['push']
+
+jobs:
+  my_context:
+    runs-on: ubuntu-latest  # Correct indentation
+    steps:
+      - name: "My Step"
+        run: |
+          echo "Action! $MY_ACTION"
+          echo "Actor! $MY_ACTOR"
+        env:
+          MY_ACTION: ${{ github.action }}
+          MY_ACTOR: ${{ github.actor }}
+
+
+
