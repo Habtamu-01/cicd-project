@@ -1,0 +1,20 @@
+name: "Steps Job Example"
+
+on: ['push']
+
+jobs:
+  job1:  # This job runs first
+    runs-on: ubuntu-latest
+    steps:
+      - name: stepA
+        run: echo "HELLO"
+
+  job2:  # This job depends on job1
+    runs-on: ubuntu-latest
+    needs: job1  # Fix: job2 runs only after job1 completes
+    steps:
+      - name: stepB
+        run: echo "WORLD"
+
+
+
